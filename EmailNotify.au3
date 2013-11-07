@@ -18,17 +18,12 @@ Const $MSG_TIMEOUT = 10
 ;##################################
 ;# Config
 ;##################################
-If $CmdLine[0] < 2 Or $CmdLine[0] > 3 Then
-   MsgBox(0, "Incorrect Usage","Usage: " & @ScriptName & " <subject> <line> [conditionText]", $MSG_TIMEOUT)
+If $CmdLine[0] <> 2 Then
+   MsgBox(0, "Incorrect Usage","Usage: " & @ScriptName & " <subject> <line>", $MSG_TIMEOUT)
    Exit (1)
 EndIf
 $Subject = $CmdLine[1]
 $Body = $CmdLine[2]
-if $CmdLine[0] == 3 Then
-   $ConditionIn = $CmdLine[3]
-Else
-   $ConditionIn = IniRead($CONFIG_FILE, "Condition", "condText", "")
-EndIf
 
 If Not FileExists($CONFIG_FILE) Then
    MsgBox(0, "Error: ","No configuration file found, making a template" & @CRLF & "This program won't work until you configure it", $MSG_TIMEOUT)
@@ -48,20 +43,15 @@ $CcAddress = IniRead($CONFIG_FILE, "Message", "CcAddress", "")
 $BccAddress = IniRead($CONFIG_FILE, "Message", "BccAddress", "")
 $Importance = IniRead($CONFIG_FILE, "Message", "Importance", "Normal")
 $FromName = IniRead($CONFIG_FILE, "Message", "FromName", "")
-$ConditionText = IniRead($CONFIG_FILE, "Condition", "condText", "")
 
 ;##################################
 ;# Mail Script
 ;##################################
-If $ConditionIn == $ConditionText Then
-   $msg = _INetSmtpMailCom($SmtpServer, $FromAddress, $ToAddress, $FromName, $Subject, $Body, $CcAddress, $BccAddress, $Importance, $Username, $Password, $Port, $SSL)
-   If @error Then
-	  MsgBox(0, "Error sending message", "Error: " & $msg, $MSG_TIMEOUT)
-   Else
-	  MsgBox(0, "Success!", "Email(s) sent!", $MSG_TIMEOUT)
-   EndIf
+$msg = _INetSmtpMailCom($SmtpServer, $FromAddress, $ToAddress, $FromName, $Subject, $Body, $CcAddress, $BccAddress, $Importance, $Username, $Password, $Port, $SSL)
+If @error Then
+   MsgBox(0, "Error sending message", "Error: " & $msg, $MSG_TIMEOUT)
 Else
-   MsgBox(0, "Screened", "Email did not pass screening (conditionText not matched)", $MSG_TIMEOUT)
+   MsgBox(0, "Success!", "Email(s) sent!", $MSG_TIMEOUT)
 EndIf
 
 Func _INetSmtpMailCom($s_SmtpServer, $s_FromAddress, $s_ToAddress, $s_FromName, $s_Subject = "", $as_Body = "", $s_CcAddress = "", $s_BccAddress = "", $s_Importance="Normal", $s_Username = "", $s_Password = "", $Port = 25, $SSL = 0)
